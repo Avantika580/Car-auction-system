@@ -35,7 +35,6 @@ npm install
 node server.js
 ```
 ## 5️⃣ Open in browser
-http://localhost:3000
 
 📂 Project Structure
 autobid/
@@ -45,11 +44,12 @@ autobid/
 │── node_modules/
 
 ## Future Enhancements
-Database integration
-Authentication & authorization
-Real-time bidding
-Payment gateway integration
+-Database integration
+-Authentication & authorization
+-Real-time bidding
+-Payment gateway integration
 
 👩‍💻 Author
 Avantika Gurav
 B.Tech Information Technology
+
