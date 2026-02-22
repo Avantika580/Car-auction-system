@@ -50,11 +50,13 @@ autobid/
 - Database integration  
 - Authentication & Authorization  
 - Real-time bidding  
-- Payment gateway integration  
+- Payment gateway integration
+  
+## Author
+**Avantika Gurav**  
+B.Tech Information Technology  
+Pune, India  
 
-## 👩‍💻 Author
-Avantika Gurav
-B.Tech in Information Technology
 
 
 
