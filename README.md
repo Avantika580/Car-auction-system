@@ -47,13 +47,14 @@ autobid/
 ```
 
 ## 🚀 Future Enhancements
-Database integration
-Authentication & Authorization
-Real-time bidding
-Payment gateway integration
+- Database integration  
+- Authentication & Authorization  
+- Real-time bidding  
+- Payment gateway integration  
 
 ## 👩‍💻 Author
 Avantika Gurav
 B.Tech in Information Technology
+
 
 
