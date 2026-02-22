@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse Car Auctions</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-100 via-blue-200 to-blue-400 min-h-screen py-10">
+
+  <div class="max-w-screen-2xl mx-auto px-6">
+    <!-- Header -->
+    <div class="text-center mb-6">
+      <h1 class="text-4xl font-bold text-blue-900">Browse Car Auctions</h1>
+      <p class="text-gray-700 mt-1">Explore available listings and find the right deal for you.</p>
+    </div>
+
+    <!-- Search -->
+    <div class="flex justify-center mb-8">
+      <div class="relative w-full max-w-2xl">
+        <input id="searchInput" type="text" placeholder="Search by name, bank, or location..."
+          class="w-full px-5 py-3 pl-12 rounded-xl border border-gray-300 shadow focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
+               viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Car Grid -->
+    <div id="car-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+
+  </div>
+
+  <script>
+    const cars = [
+      {
+        name: "Toyota Fortuner",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjkBILHfxutUSEYfZPcXSCmSgjoPU27eIDSg&s",
+        location: "Hadapsar, Pune",
+        bank: "Shaw Toyota",
+        status: "Open",
+        vehicles: 1,
+        date: "2025-04-30T23:59:59",
+        startingBid: 1200000,
+        makeModel: "Toyota Fortuner",
+        variant: "2.8 4x4 Diesel",
+        year: 2023,
+        fuel: "Diesel",
+        transmission: "Automatic",
+        kmDriven: 25000,
+        regNo: "MH14**2211",
+        rcStatus: "Valid",
+        insurance: "2026-04-10",
+        puc: "2025-10-12",
+        serviceHistory: "Yes",
+        accidentHistory: "None",
+        ownership: "1st Owner",
+        inspection: 8,
+        description: "A premium SUV with powerful performance and luxurious interiors."
+      },
+      {
+        name: "Hyundai Creta",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKjNbHL5IiIJJ1m-wahokmrdUByo3psnbkNg&s",
+        location: "Wakad, Pune",
+        bank: "Hyundai Motors",
+        status: "Open",
+        vehicles: 1,
+        date: "2025-05-01T12:00:00",
+        startingBid: 800000,
+        makeModel: "Hyundai Creta",
+        variant: "SX (O) Diesel",
+        year: 2022,
+        fuel: "Diesel",
+        transmission: "Manual",
+        kmDriven: 30000,
+        regNo: "MH12**8877",
+        rcStatus: "Valid",
+        insurance: "2026-06-15",
+        puc: "2025-11-20",
+        serviceHistory: "Yes",
+        accidentHistory: "Minor Accident",
+        ownership: "2nd Owner",
+        inspection: 7,
+        description: "A compact SUV with stylish looks and excellent fuel efficiency."
+      },
+      {
+        name: "Mahindra XUV700",
+        image: "https://www.team-bhp.com/sites/default/files/styles/check_extra_large_for_review/public/Mahindra%20XUV%20700%20petrol%20fuel%20economy.jpg",
+        location: "Baner, Pune",
+        bank: "PPS Mahindra",
+        status: "Upcoming",
+        vehicles: 1,
+        date: "2025-05-03T18:30:00",
+        startingBid: 1400000,
+        makeModel: "Mahindra XUV700",
+        variant: "AX7 Luxury Pack",
+        year: 2023,
+        fuel: "Petrol",
+        transmission: "Automatic",
+        kmDriven: 15000,
+        regNo: "MH12**9009",
+        rcStatus: "Valid",
+        insurance: "2026-01-10",
+        puc: "2025-10-05",
+        serviceHistory: "Yes",
+        accidentHistory: "None",
+        ownership: "1st Owner",
+        inspection: 9,
+        description: "Top-of-the-line trim, low mileage, and luxurious interior features."
+      },
+      {
+        name: "Maruti Suzuki Ertiga",
+        image: "https://www.financialexpress.com/wp-content/uploads/2022/07/25-Maruti-Ertiga-CNG-9-e1658727551765.jpg?w=900",
+        location: "Pimpri, Pune",
+        bank: "Maruti Suzuki Arena",
+        status: "Closed",
+        vehicles: 2,
+        date: "2025-04-25T12:00:00",
+        startingBid: 600000,
+        makeModel: "Maruti Suzuki Ertiga",
+        variant: "ZXI Plus CNG",
+        year: 2021,
+        fuel: "CNG",
+        transmission: "Manual",
+        kmDriven: 35000,
+        regNo: "MH14**7665",
+        rcStatus: "Valid",
+        insurance: "2026-05-20",
+        puc: "2025-12-01",
+        serviceHistory: "Yes",
+        accidentHistory: "None",
+        ownership: "1st Owner",
+        inspection: 8,
+        description: "Affordable family MPV with CNG for better fuel economy."
+      },
+      {
+        name: "Hyundai Verna",
+        image: "https://imgd.aeplcdn.com/1920x1080/n/cw/ec/121943/verna-facelift-exterior-right-rear-three-quarter.jpeg?isig=0",
+        location: "Wakad, Pune",
+        bank: "Hyundai Motors",
+        status: "Open",
+        vehicles: 1,
+        date: "2025-05-10T18:00:00",
+        startingBid: 750000,
+        makeModel: "Hyundai Verna",
+        variant: "SX Turbo",
+        year: 2022,
+        fuel: "Petrol",
+        transmission: "Automatic",
+        kmDriven: 20000,
+        regNo: "MH12**9932",
+        rcStatus: "Valid",
+        insurance: "2026-07-05",
+        puc: "2025-09-30",
+        serviceHistory: "Yes",
+        accidentHistory: "None",
+        ownership: "1st Owner",
+        inspection: 8,
+        description: "A premium sedan with turbocharged performance and great features."
+      },
+      {
+        name: "Mahindra Scorpio",
+        image: "https://www.financialexpress.com/wp-content/uploads/2022/06/2022-Mahindra-Scorpio-N-9.jpg",
+        location: "Baner, Pune",
+        bank: "PPS Mahindra",
+        status: "Upcoming",
+        vehicles: 1,
+        date: "2025-05-15T16:00:00",
+        startingBid: 1100000,
+        makeModel: "Mahindra Scorpio",
+        variant: "S11 4WD",
+        year: 2023,
+        fuel: "Diesel",
+        transmission: "Manual",
+        kmDriven: 20000,
+        regNo: "MH14**2255",
+        rcStatus: "Valid",
+        insurance: "2026-03-01",
+        puc: "2025-09-15",
+        serviceHistory: "Yes",
+        accidentHistory: "None",
+        ownership: "1st Owner",
+        inspection: 9,
+        description: "A rugged SUV with off-road capability and ample space."
+      },
+      {
+        name: "Tata Altroz",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Tata_Altroz_front_20230617.jpg/960px-Tata_Altroz_front_20230617.jpg",
+        location: "Kerala",
+        bank: "Tata Motors",
+        status: "Pune",
+        vehicles: 2,
+        date: "2025-05-20T12:00:00",
+        startingBid: 550000,
+        makeModel: "Tata Altroz",
+        variant: "XZ+ Petrol",
+        year: 2022,
+        fuel: "Petrol",
+        transmission: "Manual",
+        kmDriven: 12000,
+        regNo: "KL01**4555",
+        rcStatus: "Valid",
+        insurance: "2026-05-01",
+        puc: "2025-11-10",
+        serviceHistory: "Yes",
+        accidentHistory: "None",
+        ownership: "1st Owner",
+        inspection: 7,
+        description: "A compact and stylish hatchback with premium features."
+      },
+      {
+        name: "Tata Safari",
+        image: "https://images.carandbike.com/cms/articles/2024/6/3213507/Tata_Safari_Mileage_Test_2_3b8bca78f4.jpg",
+        location: "Pune",
+        bank: "Tata Motors",
+        status: "Open",
+        vehicles: 1,
+        date: "2025-06-01T10:00:00",
+        startingBid: 1300000,
+        makeModel: "Tata Safari",
+        variant: "XZA+ Diesel",
+        year: 2023,
+        fuel: "Diesel",
+        transmission: "Automatic",
+        kmDriven: 15000,
+        regNo: "MH14**7877",
+        rcStatus: "Valid",
+        insurance: "2026-08-15",
+        puc: "2025-09-30",
+        serviceHistory: "Yes",
+        accidentHistory: "None",
+        ownership: "1st Owner",
+        inspection: 9,
+        description: "A premium 7-seater SUV with plush interiors and strong performance."
+      },
+      {
+        name: "Nissan Altima",
+        image: "https://di-uploads-pod5.dealerinspire.com/nissanofturnersville/uploads/2023/07/2023-Nissan-Altima-Rear-Angle.jpg",
+        location: "Pimpri, Pune",
+        bank: "Garnet Nissan",
+        status: "Upcoming",
+        vehicles: 2,
+        date: "2025-06-05T14:00:00",
+        startingBid: 900000,
+        makeModel: "Nissan Altima",
+        variant: "SR Turbo",
+        year: 2022,
+        fuel: "Petrol",
+        transmission: "Automatic",
+        kmDriven: 18000,
+        regNo: "MH14**3322",
+        rcStatus: "Valid",
+        insurance: "2026-05-25",
+        puc: "2025-12-01",
+        serviceHistory: "Yes",
+        accidentHistory: "None",
+        ownership: "1st Owner",
+        inspection: 8,
+        description: "A sleek sedan with turbocharged performance and a smooth ride."
+      },
+      {
+        name: "Kia Seltos",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Kia_Seltos_%28front%29%2C_2021_%28India%29.jpg/800px-Kia_Seltos_%28front%29%2C_2021_%28India%29.jpg",
+        location: "Pune",
+        bank: "Kia Motors",
+        status: "Open",
+        vehicles: 1,
+        date: "2025-06-10T12:00:00",
+        startingBid: 1300000,
+        makeModel: "Kia Seltos",
+        variant: "HTX+ Diesel",
+        year: 2023,
+        fuel: "Diesel",
+        transmission: "Automatic",
+        kmDriven: 12000,
+        regNo: "MH14**4488",
+        rcStatus: "Valid",
+        insurance: "2026-07-10",
+        puc: "2025-11-20",
+        serviceHistory: "Yes",
+        accidentHistory: "None",
+        ownership: "1st Owner",
+        inspection: 9,
+        description: "A stylish compact SUV with advanced features and great fuel efficiency."
+      }
+    ];
+
+    // Get showroom from URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const showroom = urlParams.get('showroom');
+
+    localStorage.setItem("cars", JSON.stringify(cars));
+
+    const container = document.getElementById("car-list");
+    const searchInput = document.getElementById("searchInput");
+
+    function renderCars(carList) {
+      container.innerHTML = "";
+      carList.forEach((car, index) => {
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col";
+
+        card.innerHTML = `
+          <img src="${car.image}" alt="${car.name}" class="w-full h-48 object-cover">
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-gray-800 mb-1">${car.name}</h2>
+              <p class="text-sm text-gray-600">${car.showroom} • ${car.location}</p>
+              <p class="text-sm text-gray-600 mt-1">Status: 
+                <span class="${car.status === 'Open' ? 'text-green-600' : car.status === 'Closed' ? 'text-red-600' : 'text-yellow-600'} font-semibold">
+                  ${car.status}
+                </span>
+              </p>
+              <p class="text-sm text-gray-600">Vehicles: ${car.vehicles}</p>
+              <p class="text-sm text-gray-600">Ends: ${new Date(car.date).toLocaleString()}</p>
+              <p class="text-base font-semibold mt-2">₹${car.startingBid.toLocaleString()}</p>
+            </div>
+            <a href="car-details.html?id=${index}" class="mt-4 w-full bg-blue-600 text-white py-2 text-center rounded-lg hover:bg-blue-700 transition">
+              View Details
+            </a>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterCars() {
+      const query = searchInput.value.toLowerCase();
+      const filtered = cars.filter(car =>
+        car.bank.toLowerCase() === showroom.toLowerCase() && 
+        (car.name.toLowerCase().includes(query) || 
+        car.location.toLowerCase().includes(query))
+      );
+      renderCars(filtered);
+    }
+
+    renderCars(cars);
+    filterCars();
+    searchInput.addEventListener("input", filterCars);
+  </script>
+
+</body>
+</html>

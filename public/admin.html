@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AutoBid Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Fonts for consistent typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="bg-blue-600 py-5 px-8 shadow-md">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-white">AutoBid Admin Dashboard</h1>
+      <button class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md">Logout</button>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <section class="max-w-7xl mx-auto py-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+    <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
+      <p class="text-sm font-medium text-gray-500">Cars Listed</p>
+      <h2 class="text-3xl font-semibold text-pink-600">10</h2>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
+      <p class="text-sm font-medium text-gray-500">Revenue</p>
+      <h2 class="text-3xl font-semibold text-green-600">₹--</h2>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
+      <p class="text-sm font-medium text-gray-500">Total Bids</p>
+      <h2 class="text-3xl font-semibold text-yellow-500">9</h2>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300">
+      <p class="text-sm font-medium text-gray-500">Active Users</p>
+      <h2 class="text-3xl font-semibold text-blue-600">4</h2>
+    </div>
+  </section>
+
+  <!-- Graphs -->
+  <section class="max-w-7xl mx-auto py-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+      <h3 class="text-xl font-semibold text-blue-600 mb-4">Bid Trends Over Time</h3>
+      <canvas id="bidTrendsChart"></canvas>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+      <h3 class="text-xl font-semibold text-blue-600 mb-4">Car Types Breakdown</h3>
+      <canvas id="carTypesChart"></canvas>
+    </div>
+  </section>
+
+  <!-- Auctions Table -->
+  <section class="max-w-7xl mx-auto py-10">
+    <h3 class="text-xl font-semibold text-blue-600 mb-4">Active Auctions</h3>
+    <div class="bg-white rounded-lg shadow-lg overflow-x-auto">
+      <table class="min-w-full text-sm text-gray-700">
+        <thead class="bg-blue-50 text-blue-600">
+          <tr>
+            <th class="px-6 py-4 text-left">Model</th>
+            <th class="px-6 py-4 text-left">Location</th>
+            <th class="px-6 py-4 text-left">Start Price</th>
+            <th class="px-6 py-4 text-left">Status</th>
+            <th class="px-6 py-4 text-left">Action</th>
+          </tr>
+        </thead>
+        <tbody id="auctionTableBody">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Previously Auctioned Cars -->
+  <section class="max-w-7xl mx-auto py-10">
+    <h3 class="text-xl font-semibold text-blue-600 mb-4">Previously Auctioned Cars</h3>
+    <div class="bg-white rounded-lg shadow-lg overflow-x-auto">
+      <table class="min-w-full text-sm text-gray-700">
+        <thead class="bg-blue-50 text-blue-600">
+          <tr>
+            <th class="px-6 py-4 text-left">Model</th>
+            <th class="px-6 py-4 text-left">Location</th>
+            <th class="px-6 py-4 text-left">Final Price</th>
+            <th class="px-6 py-4 text-left">Status</th>
+            <th class="px-6 py-4 text-left">Action</th>
+          </tr>
+        </thead>
+        <tbody id="previousHyundaiTableBody">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script>
+    const cars = [
+      {
+        name: "Toyota Fortuner",
+        location: "Hadapsar, Pune",
+        bank: "Shaw Toyota",
+        status: "Open",
+        vehicles: 1,
+        date: "2025-04-30T23:59:59",
+        startingBid: 1200000,
+        makeModel: "Toyota Fortuner",
+        variant: "2.8 4x4 Diesel",
+        year: 2023,
+        fuel: "Diesel",
+        transmission: "Automatic",
+        kmDriven: 25000,
+        regNo: "MH14**2211",
+        rcStatus: "Valid",
+        insurance: "2026-04-10",
+        puc: "2025-10-12",
+        serviceHistory: "Yes",
+        accidentHistory: "None",
+        ownership: "1st Owner",
+        inspection: 8,
+        description: "A premium SUV with powerful performance and luxurious interiors."
+      },
+      {
+        name: "Hyundai Creta",
+        location: "Wakad, Pune",
+        bank: "Hyundai Motors",
+        status: "Closed",
+        vehicles: 1,
+        date: "2025-03-15T10:30:00",
+        startingBid: 950000,
+        makeModel: "Hyundai Creta",
+        variant: "SX Plus 1.5 Petrol",
+        year: 2021,
+        fuel: "Petrol",
+        transmission: "Manual",
+        kmDriven: 20000,
+        regNo: "MH13**3124",
+        rcStatus: "Valid",
+        insurance: "2025-05-01",
+        puc: "2025-11-12",
+        serviceHistory: "Yes",
+        accidentHistory: "None",
+        ownership: "1st Owner",
+        inspection: 9,
+        description: "A premium compact SUV with advanced features and great driving dynamics."
+      },
+      {
+        name: "Maruti Suzuki Ertiga",
+        location: "Wakad, Pune",
+        bank: "Maruti Suzuki Arena",
+        status: "Open",
+        vehicles: 1,
+        date: "2025-05-01T12:00:00",
+        startingBid: 850000,
+        makeModel: "Maruti Ertiga",
+        variant: "ZXi+ Petrol",
+        year: 2022,
+        fuel: "Petrol",
+        transmission: "Manual",
+        kmDriven: 15000,
+        regNo: "MH12**5467",
+        rcStatus: "Valid",
+        insurance: "2026-06-01",
+        puc: "2025-10-05",
+        serviceHistory: "Yes",
+        accidentHistory: "None",
+        ownership: "1st Owner",
+        inspection: 7,
+        description: "A compact MPV with spacious interiors and great fuel efficiency."
+      },
+    ];
+
+    const tableBody = document.getElementById("auctionTableBody");
+    const previousHyundaiTableBody = document.getElementById("previousHyundaiTableBody");
+
+    const openCars = cars.filter(car => car.status === "Open");
+    const hyundaiCars = cars.filter(car => car.makeModel.includes("Hyundai"));
+
+    openCars.forEach(car => {
+      const row = document.createElement("tr");
+      row.className = "border-t hover:bg-blue-50 transition duration-200";
+      row.innerHTML = `
+        <td class="px-6 py-4">${car.makeModel}</td>
+        <td class="px-6 py-4">${car.location}</td>
+        <td class="px-6 py-4">₹${car.startingBid}</td>
+        <td class="px-6 py-4">${car.status}</td>
+        <td class="px-6 py-4"><button class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md transition duration-300">Bid</button></td>
+      `;
+      tableBody.appendChild(row);
+    });
+
+    hyundaiCars.forEach(car => {
+      const row = document.createElement("tr");
+      row.className = "border-t hover:bg-blue-50 transition duration-200";
+      row.innerHTML = `
+        <td class="px-6 py-4">${car.makeModel}</td>
+        <td class="px-6 py-4">${car.location}</td>
+        <td class="px-6 py-4">₹850,000</td>
+        <td class="px-6 py-4">${car.status}</td>
+        <td class="px-6 py-4"><button class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md transition duration-300">View Details</button></td>
+      `;
+      previousHyundaiTableBody.appendChild(row);
+    });
+
+    // Graphs
+    const bidTrendsCtx = document.getElementById("bidTrendsChart");
+    new Chart(bidTrendsCtx, {
+      type: "line",
+      data: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+        datasets: [{
+          label: "Bid Amount (₹)",
+          data: [50000, 60000, 75000, 80000, 90000],
+          borderColor: "#FF6F61",
+          tension: 0.3,
+          fill: false
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    const carTypesCtx = document.getElementById("carTypesChart");
+    new Chart(carTypesCtx, {
+      type: "pie",
+      data: {
+        labels: ["SUV", "Sedan", "MPV"],
+        datasets: [{
+          data: [1, 1, 1],
+          backgroundColor: ["#FF6F61", "#FFB142", "#2D9CDB"],
+        }]
+      }
+    });
+  </script>
+
+  <!-- Upcoming Auction Cars -->
+  <section class="max-w-7xl mx-auto py-10">
+    <h3 class="text-xl font-semibold text-blue-600 mb-4">Upcoming Auction Cars</h3>
+    <div class="bg-white rounded-lg shadow-lg overflow-x-auto">
+      <table class="min-w-full text-sm text-gray-700">
+        <thead class="bg-blue-50 text-blue-600">
+          <tr>
+            <th class="px-6 py-4 text-left">Model</th>
+            <th class="px-6 py-4 text-left">Location</th>
+            <th class="px-6 py-4 text-left">Final Price</th>
+            <th class="px-6 py-4 text-left">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-t hover:bg-blue-50 transition duration-200">
+            <td class="px-6 py-4">Mahindra XUV700</td>
+            <td class="px-6 py-4">Baner</td>
+            <td class="px-6 py-4">₹1,450,000</td>
+            <td class="px-6 py-4">Upcoming</td>
+          </tr>
+          <tr class="border-t hover:bg-blue-50 transition duration-200">
+            <td class="px-6 py-4">Mahindra Scorpio</td>
+            <td class="px-6 py-4">Baner</td>
+            <td class="px-6 py-4">₹1,130,000</td>
+            <td class="px-6 py-4">Upcoming</td>
+          </tr>
+          <tr class="border-t hover:bg-blue-50 transition duration-200">
+            <td class="px-6 py-4">Nissan Altima</td>
+            <td class="px-6 py-4">Pimpri</td>
+            <td class="px-6 py-4">₹940,000</td>
+            <td class="px-6 py-4">Upcoming</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</body>
+</html>

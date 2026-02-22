@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Car Details - AutoBid</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+</head>
+<body class="bg-blue-100 min-h-screen py-10 px-4">
+  <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-6">
+    <a href="browse.html" class="text-blue-600 hover:underline block mb-4">← Back to Browse</a>
+
+    <div class="grid md:grid-cols-2 gap-6 items-start">
+      <img id="car-image" src="" alt="Car" class="rounded-xl w-full h-64 object-cover shadow-md">
+      <div>
+        <h2 id="car-name" class="text-3xl font-bold text-blue-800 mb-2"></h2>
+        <p><strong>Showroom:</strong> <span id="car-bank"></span></p>
+        <p><strong>Location:</strong> <span id="car-location"></span></p>
+        <p><strong>Status:</strong> <span id="car-status" class="font-semibold"></span></p>
+        <p><strong>Base Price:</strong> ₹<span id="car-base-price"></span></p>
+        <p><strong>Starting Bid:</strong> ₹<span id="car-starting-bid"></span></p>
+        <p><strong>Auction Ends:</strong> <span id="car-end-date"></span></p>
+
+        <!-- Additional Car Details -->
+        <p><strong>Make & Model:</strong> <span id="car-make-model"></span></p>
+        <p><strong>Variant:</strong> <span id="car-variant"></span></p>
+        <p><strong>Year:</strong> <span id="car-year"></span></p>
+        <p><strong>Fuel:</strong> <span id="car-fuel"></span></p>
+        <p><strong>Transmission:</strong> <span id="car-transmission"></span></p>
+        <p><strong>KM Driven:</strong> <span id="car-km-driven"></span></p>
+        <p><strong>Registration No:</strong> <span id="car-regno"></span></p>
+        <p><strong>RC Status:</strong> <span id="car-rc-status"></span></p>
+        <p><strong>Insurance:</strong> <span id="car-insurance"></span></p>
+        <p><strong>PUC:</strong> <span id="car-puc"></span></p>
+        <p><strong>Service History:</strong> <span id="car-service-history"></span></p>
+        <p><strong>Accident History:</strong> <span id="car-accident-history"></span></p>
+        <p><strong>Ownership:</strong> <span id="car-ownership"></span></p>
+        <p><strong>Description:</strong> <span id="car-description"></span></p>
+
+        <!-- Updated Timer Section -->
+        <p class="mt-4 text-2xl font-semibold text-green-700 bg-green-100 py-2 px-4 rounded-lg inline-block">
+          ⏳ Ends in: <span id="countdown" class="text-3xl font-bold">15s left</span>
+        </p>
+
+        <div id="highest-bidder-badge" class="mt-2 bg-green-100 text-green-700 px-3 py-1 rounded-full inline-block text-sm font-semibold hidden">
+          You are the highest bidder!
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6">
+      <h3 class="text-xl font-semibold mb-2">Place a Bid</h3>
+      <div class="flex gap-2">
+        <input type="number" id="bid-amount" placeholder="Enter bid amount"
+          class="flex-1 border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring focus:border-blue-400">
+        <button id="bid-btn" onclick="submitBid()"
+          class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Submit Bid</button>
+      </div>
+      <p class="text-sm text-gray-500 mt-2">Bid in ₹10,000 increments only</p>
+    </div>
+
+    <div class="mt-6">
+      <h3 class="text-xl font-semibold mb-2">Bid History</h3>
+      <table class="w-full table-auto border-collapse">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="text-left px-4 py-2 border">Username</th>
+            <th class="text-left px-4 py-2 border">Bid Amount</th>
+            <th class="text-left px-4 py-2 border">Time</th>
+          </tr>
+        </thead>
+        <tbody id="bid-history"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Winner Modal -->
+  <div id="winner-modal" class="hidden fixed inset-0 bg-black/60 flex justify-center items-center z-50">
+    <div class="bg-white p-8 rounded-xl shadow-xl text-center max-w-sm w-full">
+      <h2 class="text-3xl font-bold text-green-600 mb-4">🎉 Congratulations!</h2>
+      <p class="mb-4 text-gray-700">You are the highest bidder!</p>
+      <button onclick="window.location.href='payment.html'"
+        class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Proceed to Payment</button>
+    </div>
+  </div>
+
+  <!-- Lose Modal -->
+  <div id="lose-modal" class="hidden fixed inset-0 bg-black/60 flex justify-center items-center z-50">
+    <div class="bg-white p-8 rounded-xl shadow-xl text-center max-w-sm w-full">
+      <h2 class="text-3xl font-bold text-red-600 mb-4">😢 Better Luck Next Time!</h2>
+      <p class="mb-4 text-gray-700">You were outbid by the system.</p>
+      <button onclick="document.getElementById('lose-modal').classList.add('hidden')"
+        class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">Close</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const carId = parseInt(params.get("id"));
+    const cars = JSON.parse(localStorage.getItem("cars")) || [];
+    const car = cars[carId];
+    const bidsKey = `bids_${carId}`;
+    const username = "demo_user";  // Placeholder for the logged-in user.
+    const socket = io();
+    let bids = JSON.parse(localStorage.getItem(bidsKey)) || [];
+    let biddingOpen = false;
+    let userBidPlaced = false;
+    const displayedBidsSet = new Set();
+
+    if (car) {
+      document.getElementById("car-image").src = car.image;
+      document.getElementById("car-name").textContent = car.name;
+      document.getElementById("car-bank").textContent = car.bank;
+      document.getElementById("car-location").textContent = car.location;
+      document.getElementById("car-status").textContent = car.status;
+      document.getElementById("car-end-date").textContent = new Date(car.date).toLocaleString();
+      document.getElementById("car-base-price").textContent = car.startingBid.toLocaleString();
+      document.getElementById("car-starting-bid").textContent = (car.startingBid + 10000).toLocaleString();
+
+      // New details
+      document.getElementById("car-make-model").textContent = car.makeModel || "";
+      document.getElementById("car-variant").textContent = car.variant || "";
+      document.getElementById("car-year").textContent = car.year || "";
+      document.getElementById("car-fuel").textContent = car.fuel || "";
+      document.getElementById("car-transmission").textContent = car.transmission || "";
+      document.getElementById("car-km-driven").textContent = car.kmDriven || "";
+      document.getElementById("car-regno").textContent = car.registrationNo || "";
+      document.getElementById("car-rc-status").textContent = car.rcStatus || "";
+      document.getElementById("car-insurance").textContent = car.insurance || "";
+      document.getElementById("car-puc").textContent = car.puc || "";
+      document.getElementById("car-service-history").textContent = car.serviceHistory || "";
+      document.getElementById("car-accident-history").textContent = car.accidentHistory || "";
+      document.getElementById("car-ownership").textContent = car.ownership || "";
+      document.getElementById("car-description").textContent = car.description || "";
+
+      bids.slice().reverse().forEach(displayBid);
+      startBiddingRound();
+    }
+
+    function displayBid(bid) {
+      const uniqueKey = `${bid.username}_${bid.amount}_${bid.time}`;
+      if (displayedBidsSet.has(uniqueKey)) return;
+      displayedBidsSet.add(uniqueKey);
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="px-4 py-2 border">${bid.username}</td>
+        <td class="px-4 py-2 border">₹${Number(bid.amount).toLocaleString()}</td>
+        <td class="px-4 py-2 border">${new Date(bid.time).toLocaleTimeString()}</td>`;
+      document.getElementById("bid-history").prepend(tr);
+    }
+
+    function getHighestBid() {
+      const all = JSON.parse(localStorage.getItem(bidsKey)) || [];
+      return all.length ? all[0].amount : car.startingBid;
+    }
+
+    function updateBidButton(enabled) {
+      document.getElementById("bid-btn").disabled = !enabled;
+    }
+
+    function submitBid() {
+      if (!biddingOpen) return alert("Bidding is closed.");
+      const amount = parseFloat(document.getElementById("bid-amount").value);
+      const highest = getHighestBid();
+      if (amount !== highest + 10000) return alert(`Your bid must be ₹${highest + 10000}`);
+
+      const bid = {
+        username,
+        amount,
+        time: new Date().toISOString()
+      };
+
+      bids = [bid, ...bids];
+      localStorage.setItem(bidsKey, JSON.stringify(bids));
+      displayBid(bid);
+      socket.emit("newBid", { carId, amount, username, time: bid.time });
+
+      userBidPlaced = true;
+      document.getElementById("bid-amount").value = amount + 10000;
+      document.getElementById("highest-bidder-badge").classList.remove("hidden");
+    }
+
+    function startBiddingRound() {
+      biddingOpen = true;
+      updateBidButton(true);
+      document.getElementById("bid-amount").value = getHighestBid() + 10000;
+      let seconds = 15;
+
+      document.getElementById("countdown").textContent = `${seconds}s left`;
+      const countdown = setInterval(() => {
+        if (seconds > 0) {
+          seconds--;
+          document.getElementById("countdown").textContent = `${seconds}s left`;
+        } else {
+          clearInterval(countdown);
+          endBiddingRound();
+        }
+      }, 1000);
+
+      // After user places bid, the system will place a bid automatically
+      const autoBidInterval = setInterval(() => {
+        const lastBid = bids[0];
+        if (biddingOpen && userBidPlaced && lastBid?.username === username) {
+          const systemBid = {
+            username: "AutoBid System",
+            amount: lastBid.amount + 10000,
+            time: new Date().toISOString()
+          };
+          bids = [systemBid, ...bids];
+          localStorage.setItem(bidsKey, JSON.stringify(bids));
+          displayBid(systemBid);
+          socket.emit("newBid", { carId, amount: systemBid.amount, username: systemBid.username, time: systemBid.time });
+          userBidPlaced = false;
+          document.getElementById("bid-amount").value = systemBid.amount + 10000;
+        }
+      }, 2000);
+    }
+
+    function endBiddingRound() {
+      biddingOpen = false;
+      updateBidButton(false);
+      checkWinner();
+      setTimeout(startBiddingRound, 15000); // Restart the round after 15 seconds.
+    }
+
+    function checkWinner() {
+      const latest = JSON.parse(localStorage.getItem(bidsKey)) || [];
+      if (latest.length) {
+        if (latest[0].username === username) {
+          showWinnerCard();
+        } else if (latest[0].username === "AutoBid System") {
+          showLoseCard();
+        }
+      }
+    }
+
+    function showWinnerCard() {
+      document.getElementById("winner-modal").classList.remove("hidden");
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }), i * 300);
+      }
+    }
+
+    function showLoseCard() {
+      document.getElementById("lose-modal").classList.remove("hidden");
+    }
+
+    socket.emit("joinRoom", carId);
+    socket.on("bidUpdate", (data) => {
+      if (data.carId !== carId) return;
+      displayBid({ username: data.username, amount: data.amount, time: data.time });
+    });
+  </script>
+</body>
+</html>
