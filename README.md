@@ -36,25 +36,24 @@ node server.js
 ```
 ## 5️⃣ Open in browser
 
-📂 Project Structure
+## project structure
+
+```bash
 autobid/
 │── server.js
 │── package.json
 │── public/
 │── node_modules/
+```
 
----
+## 🚀 Future Enhancements
+Database integration
+Authentication & Authorization
+Real-time bidding
+Payment gateway integration
 
-## Future Enhancements
--Database integration
--Authentication & authorization
--Real-time bidding
--Payment gateway integration
-
----
-
-👩‍💻 Author
+## 👩‍💻 Author
 Avantika Gurav
-B.Tech Information Technology
+B.Tech in Information Technology
 
 
