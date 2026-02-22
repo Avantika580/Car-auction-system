@@ -43,13 +43,18 @@ autobid/
 │── public/
 │── node_modules/
 
+---
+
 ## Future Enhancements
 -Database integration
 -Authentication & authorization
 -Real-time bidding
 -Payment gateway integration
 
+---
+
 👩‍💻 Author
 Avantika Gurav
 B.Tech Information Technology
+
 
